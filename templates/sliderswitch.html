@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Home Automation{% endblock %}
+
+{% block content %}
+<table>
+    <tr>
+        {% for favorite in favorites %}
+            {% for entity in entities_data %}
+                {% if entity.entity_id == favorite %}
+                    <td>
+                        <a href="{{ url_for('toggle_entity', entity_id=entity.entity_id) }}">
+                        {{ entity.entity_id | capitalize }}<br>
+                        {% if entity.state == 'on' %}
+                            <img src="{{ url_for('static', filename='on.png') }}">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='off.png') }}">
+                        {% endif %}
+                        </a>
+                    </td>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </tr>
+</table>
+{% endblock %}

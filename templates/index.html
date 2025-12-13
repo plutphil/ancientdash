@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Assistant States</title>
+</head>
+<body>
+    {% if favorites %}
+        <h2>Favorites</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Entity ID</th>
+                    <th>State</th>
+                    <th>Action</th>
+                    {% if edit_mode %}
+                        <th>Edit Mode</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for favorite in favorites %}
+                    {% for entity in entities_data %}
+                        {% if entity.entity_id == favorite %}
+                            <tr>
+                                <td>{{ entity.entity_id }}</td>
+                                <td>{{ entity.state }}</td>
+                                <td><a href="{{ url_for('toggle_entity', entity_id=entity.entity_id) }}">Toggle</a></td>
+                                {% if edit_mode %}
+                                    <td><a href="{{ url_for('remove_from_favorites_route', entity_id=entity.entity_id) }}">Remove</a></td>
+                                {% endif %}
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    <h1>Home Assistant States</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Entity ID</th>
+                <th>State</th>
+                <th>Action</th>
+                <th>Favorites</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entity in entities_data %}
+                <tr>
+                    <td>{{ entity.entity_id }}</td>
+                    <td>{{ entity.state }}</td>
+                    <td><a href="{{ url_for('toggle_entity', entity_id=entity.entity_id) }}">Toggle</a></td>
+                    <td><a href="{{ url_for('add_to_favorites_route', entity_id=entity.entity_id) }}">Add to Favorites</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    
+</body>
+</html>
