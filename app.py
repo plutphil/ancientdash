@@ -1,5 +1,6 @@
 import requests
 from flask import Flask, render_template, redirect, url_for, jsonify
+from flask import request
 import json
 import time
 import os
@@ -7,7 +8,8 @@ import os
 
 app = Flask(__name__)
 
-
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
 
 def get_home_assistant_data(api_endpoint, access_token):
     headers = {
@@ -79,6 +81,22 @@ favorites = get_favorites()
 api_endpoint = "http://supervisor"
 access_token = token
 
+@app.before_request
+def print_headers():
+    app.logger.info("=== Incoming Headers ===")
+    for header, value in request.headers.items():
+        app.logger.info(f"{header}: {value}")
+    
+    # Specifically check for Home Assistant Ingress header
+    ingress_path = request.headers.get("X-Ingress-Path")
+    if ingress_path:
+        app.logger.info(f"Home Assistant Ingress Path: {ingress_path}")
+
+@app.template_global()
+def ingress_url(endpoint, **values):
+    ingress_path = request.headers.get("X-Ingress-Path", "")
+    return f"{ingress_path}{url_for(endpoint, **values)}"
+
 @app.route('/')
 def index():
     # Replace these values with your Home Assistant API endpoint and access token
@@ -105,15 +123,16 @@ def toggle_entity(entity_id):
     toggle_switch(api_endpoint, access_token, entity_id)
     #time.sleep(0.1)
     # Redirect back to the home page
-    return redirect(url_for('index'))
+    return redirect(ingress_url('index'))
 
 @app.route('/add_to_favorites/<entity_id>')
 def add_to_favorites_route(entity_id):
     add_to_favorites(entity_id)
-    return redirect(url_for('index'))
+    return redirect(ingress_url('index'))
 
 @app.route('/favorites')
 def favorites_route():
     return jsonify(favorites)
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

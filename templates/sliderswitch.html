@@ -9,12 +9,12 @@
             {% for entity in entities_data %}
                 {% if entity.entity_id == favorite %}
                     <td>
-                        <a href="{{ url_for('toggle_entity', entity_id=entity.entity_id) }}">
+                        <a href="{{ ingress_url('toggle_entity', entity_id=entity.entity_id) }}">
                         {{ entity.entity_id | capitalize }}<br>
                         {% if entity.state == 'on' %}
-                            <img src="{{ url_for('static', filename='on.png') }}">
+                            <img src="{{ ingress_url('static', filename='on.png') }}">
                         {% else %}
-                            <img src="{{ url_for('static', filename='off.png') }}">
+                            <img src="{{ ingress_url('static', filename='off.png') }}">
                         {% endif %}
                         </a>
                     </td>
