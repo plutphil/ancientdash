@@ -20,8 +20,8 @@ def get_home_assistant_data(api_endpoint, access_token):
     entities_response = requests.get(entities_url, headers=headers)
     app.logger.info(entities_response)
 
-    app.logger.info(entities_response.text)
-    app.logger.info(api_endpoint+" "+access_token)
+    #app.logger.info(entities_response.text)
+    #app.logger.info(api_endpoint+" "+access_token)
     entities_data = entities_response.json()
 
     # Filter out entities with state 'unavailable'
@@ -31,15 +31,21 @@ def get_home_assistant_data(api_endpoint, access_token):
 
 def toggle_switch(api_endpoint, access_token, entity_id):
     # Call the Home Assistant service to toggle the switch
-    requests.post(
-        f"{api_endpoint}/core/api/services/switch/toggle",
+    path = "switch"
+    if entity_id.startswith("light"):
+        path = "light"
+    res = requests.post(
+        f"{api_endpoint}/core/api/services/{path}/toggle",
         headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
         json={"entity_id": entity_id}
     )
+    app.logger.info(res)
+
+FAVS_PATH = '/data/favorites.json'
 
 def get_favorites():
     try:
-        with open('favorites.json', 'r') as file:
+        with open(FAVS_PATH, 'r') as file:
             favorites = json.load(file)
     except FileNotFoundError:
         favorites = []
@@ -50,7 +56,7 @@ def get_favorites():
 def add_to_favorites(entity_id):
     global favorites
     try:
-        with open('favorites.json', 'r') as file:
+        with open(FAVS_PATH, 'r') as file:
             favorites = json.load(file)
     except FileNotFoundError:
         favorites = []
@@ -58,7 +64,7 @@ def add_to_favorites(entity_id):
     if entity_id not in favorites:
         favorites.append(entity_id)
 
-        with open('favorites.json', 'w') as file:
+        with open(FAVS_PATH, 'w') as file:
             json.dump(favorites, file, indent=2)
             
 
